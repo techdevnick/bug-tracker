@@ -1,0 +1,52 @@
+<HTML>
+<head>
+
+<!--<script>
+</script>-->
+
+<style>
+*{
+	margin:0;
+	padding:0;
+}
+
+.grid-menu{
+	grid-area:menu;
+	background-color:#ffa300;
+	padding:65px;
+}
+.grid-main{
+	grid-area:main;
+	background-color:#333;
+}
+.grid-footer{
+	grid-area:footer;
+}
+
+.grid-container {
+	display:grid;
+	width:100%;
+	min-height:100vh;
+	grid-template-areas:
+		'menu main'
+		'footer footer';
+	grid-gap:0px;
+	background-color:#2196F3;
+	grid-template-columns: 340px 1fr;
+	grid-template-rows:1fr 200px;
+}
+
+</style>
+</head>
+<body>
+
+<div class="grid-container">
+  <div class="grid-menu">Menu</div>
+  <div class="grid-main">Main</div>  
+  <div class="grid-footer">Footer</div>
+</div>
+
+<!--<script>
+</script>-->
+</body>
+</HTML>
