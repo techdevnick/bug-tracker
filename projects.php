@@ -56,25 +56,111 @@ if (!securePage($_SERVER['PHP_SELF'])){die();}
 		
 		
 		
-		echo '<div class="project-display"><table><tbody>';
-		echo '<tr><td><div class="project-display-title">Client</div></td><td><div>Project</div></td>';
+		echo '<div class="project-grid-container">
+						<div class="project-grid-item project-table-title">Client</div>
+						<div>
+							<div class="project-grid-subgrid">
+								<div class="project-grid-item project-table-title">Project Info</div>
+								<div class="project-grid-item project-table-title">Status</div>
+								<div class="project-grid-item project-table-title">Priority</div>
+								<div class="project-grid-item project-table-title">Date Created</div>
+							</div>
+						</div>
+					</div>
+					<div class="project-grid-container">
+						<div class="project-grid-item">
+							<select class="client-order" id="client-order" name="client-order">
+								<option value="ascending" selected>Ascending</option>
+								<option value="descending">Descending</option>
+							</select>
+						</div>
+						<div>
+							<div class="project-grid-subgrid">
+								<div class="project-grid-item no-padding">
+									<div class="unique-project-search">
+										<div class="unique-project-stretch">
+											<input class="project-searchbar" type="text" placeholder="Search Projects (can be left blank, just submit to apply filters)">
+											<div></div>
+											<input class="project-search" type="submit" value="Submit">
+										</div>
+										<div>
+											<select class="input-100" id="type" name="type">
+												<option value="all-types" selected>All Types</option>
+												<option value="software">Software</option>
+												<option value="website">Website</option>
+												<option value="webapp">Web App</option>
+												<option value="mobileapp">Mobile App</option>
+											</select>
+										</div>
+									</div>
+								</div>
+								<div class="project-grid-item">
+									<select class="input-100" id="status" name="status">
+										<option value="active" selected>Active</option>
+										<option value="idle">Idle</option>
+										<option value="completed">Completed</option>
+										<option value="inactive">Inactive</option>
+										<option value="all-status">All Statuses</option>
+									</select>
+								</div>
+								<div class="project-grid-item">
+									<select class="input-100" id="priorities" name="priorities">
+										<option value="all-priorities" selected>All Priorities</option>
+										<option value="low">Low</option>
+										<option value="medium">Medium</option>
+										<option value="high">High</option>
+									</select>
+								</div>
+								<div class="project-grid-item">
+									<select class="input-100 date-sort-input" id="priorities" name="priorities">
+										<option value="new-first" selected>Newest First</option>
+										<option value="old-first">Oldest First</option>
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>';
 		
 		$yyyx = 0;
 		
 		while($row = mysqli_fetch_assoc($result)) {
 			if($previous_client != $row["client"]){
 				if($previous_client != ""){
-					echo '</td></tr>';
+					echo '</div></div>';
 				}
-				echo '<tr><td><div class="project-display-title">'.$row["client"].'</div></td>';
-				echo '<td><a href="tickets.php?project_id='.$row["project_id"].'">'.$row["title"].' ('.ucwords($row["type"]).')<br />'.$row["description"].'</a>';
+
+				echo '<div class="project-grid-container">
+						<div class="project-grid-item project-client-name">'.$row["client"].'</div>
+						<div>
+							<a href="tickets.php?project_id='.$row["project_id"].'">
+								<div class="project-grid-subgrid">
+									<div class="project-grid-item">
+										<div class="project-title">'.$row["title"].' ('.ucwords($row["type"]).')</div>
+										'.$row["description"].'
+									</div>
+									<div class="project-grid-item">'.ucwords($row["status"]).'</div>
+									<div class="project-grid-item">'.ucwords($row["priority"]).'</div>
+									<div class="project-grid-item">'.$row["date_created"].'</div>
+								</div>
+							</a>';
+				
 			}elseif($previous_client == $row["client"]){
-				echo '<br /><a href="tickets.php?project_id='.$row["project_id"].'">'.$row["title"].' ('.ucwords($row["type"]).')<br />'.$row["description"].'</a>';
+				echo '<a href="tickets.php?project_id='.$row["project_id"].'">
+								<div class="project-grid-subgrid">
+									<div class="project-grid-item">
+										<div class="project-title">'.$row["title"].' ('.ucwords($row["type"]).')</div>
+										'.$row["description"].'
+									</div>
+									<div class="project-grid-item">'.ucwords($row["status"]).'</div>
+									<div class="project-grid-item">'.ucwords($row["priority"]).'</div>
+									<div class="project-grid-item">'.$row["date_created"].'</div>
+								</div>
+							</a>';
 			}
 			$previous_client = $row["client"];
 		}
 		
-		echo '</tr></tbody></table></div>';
+		echo '</div></div>';
 		
 		
 		if($result_count_number > $limit_query_projects && ($num == 0 || $result_count_number > $num*$limit_query_projects)){
