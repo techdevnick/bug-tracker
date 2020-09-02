@@ -697,10 +697,23 @@ input.project-search{
 	margin-right:2%;
 }
 
+.page-turner{
+	display:flex;
+	justify-content:left;
+	flex-wrap:wrap;
+	padding:20px var(--main-content-left-margin);
+}
 
-
-
-
+.page-turner a{
+	display:block;
+	text-decoration:none;
+	border:1px solid #CCC;
+	padding:5px;
+	border-radius:5px;
+	text-align:center;
+	margin-right:10px;
+	min-width:1rem;
+}
 
 
 
