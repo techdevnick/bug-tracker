@@ -100,7 +100,7 @@ if (file_exists($abs_us_root . $us_url_root . 'usersc/templates/' . $settings->t
 	<div class="grid-main">
 		<div class="main-header">
 			<div class="page-title">
-				<span>Dashboard</span>
+				<span><?php echo $pageTitle ?></span>
 			</div>
 			
 			<div class="header-notifications">
