@@ -164,7 +164,7 @@ if (!securePage($_SERVER['PHP_SELF'])){die();}
 		
 		
 		if($result_count_number > $limit_query_projects && ($num == 0 || $result_count_number > $num*$limit_query_projects)){
-			echo "Page";
+			echo '<div class="page-turner">';
 			$projects_pagination = ceil($result_count_number/$limit_query_projects);
 			for($x = 1; $x <= $projects_pagination; $x++){
 				echo ' <a class="page-selector';
@@ -175,6 +175,7 @@ if (!securePage($_SERVER['PHP_SELF'])){die();}
 				
 				echo '" href="projects.php?page='.$x.'">'.$x.'</a>';
 			}
+			echo '</div>';
 		}
 		
 	} else {
