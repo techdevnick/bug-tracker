@@ -164,17 +164,77 @@ if (!securePage($_SERVER['PHP_SELF'])){die();}
 		
 		
 		if($result_count_number > $limit_query_projects && ($num == 0 || $result_count_number > $num*$limit_query_projects)){
+			
 			echo '<div class="page-turner">';
-			$projects_pagination = ceil($result_count_number/$limit_query_projects);
-			for($x = 1; $x <= $projects_pagination; $x++){
-				echo ' <a class="page-selector';
-				
-				if($x == $num+1){
-					echo ' current-page';
+			
+			//if there are 5 or less pages
+			if(ceil($result_count_number/$limit_query_projects) < 6){
+				$projects_pagination = ceil($result_count_number/$limit_query_projects);
+				for($x = 1; $x <= $projects_pagination; $x++){
+					echo ' <a class="page-selector';
+					
+					if($x == $num+1){
+						echo ' current-page';
+					}
+					
+					echo '" href="?page='.$x.'">'.$x.'</a>';
 				}
+			}else{
+				$page_limiter = 5;//limit of how many pages to show
+				$max_page = ceil($result_count_number/$limit_query_projects);// this will just return the max page for the query
+				$page_start_at = 1;//default is 1 but will be overridden with GET['page']
 				
-				echo '" href="projects.php?page='.$x.'">'.$x.'</a>';
+				//if current page < 4 then show 1-5 and MAX
+				
+				/*if(isset($_GET['page']) && ($_GET['page']) == 1){
+					echo '<a href="?page=1">1</a>';
+				}*/
+				
+				if(!isset($_GET['page']) || $_GET['page'] <= 3){
+					//echo 'show 1-3-5, and MAX';
+					for($x = 1; $x <= 5; $x++){
+						echo ' <a class="page-selector';
+						
+						if($x == $num+1){
+							echo ' current-page';
+						}
+						
+						echo '" href="?page='.$x.'">'.$x.'</a>';
+					}
+					
+					echo '<div class="dot-dot-dot">...</div><a class="page-selector" href="?page='.$max_page.'">'.$max_page.'</a>';
+				}else if($_GET['page'] >= ($max_page - 2)){
+					//echo 'show 1, and MAX - 3';
+					echo '<a class="page-selector" href="?page=1">1</a><div class="dot-dot-dot">...</div>';
+					
+					for($x = $max_page-4; $x <= $max_page; $x++){
+						echo ' <a class="page-selector';
+						
+						if($x == $num+1){
+							echo ' current-page';
+						}
+						
+						echo '" href="?page='.$x.'">'.$x.'</a>';
+					}
+				}else{
+					//echo 'show 1, c, and MAX';
+					
+					echo '<a class="page-selector" href="?page=1">1</a><div class="dot-dot-dot">...</div>';
+					
+					for($x = $num-1; $x <= $num+3; $x++){
+						echo ' <a class="page-selector';
+						
+						if($x == $num+1){
+							echo ' current-page';
+						}
+						
+						echo '" href="?page='.$x.'">'.$x.'</a>';
+					}
+					
+					echo '<div class="dot-dot-dot">...</div><a class="page-selector" href="?page='.$max_page.'">'.$max_page.'</a>';
+				}
 			}
+			
 			echo '</div>';
 		}
 		
