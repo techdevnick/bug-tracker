@@ -41,23 +41,187 @@ if (!securePage($_SERVER['PHP_SELF'])){die();}
 		$query_offset_projects = "OFFSET ".$num*$limit_query_projects;
 	}
 
-	$sql_count = "SELECT COUNT(*) as 'countxx' FROM projects;";
+	//$sql_count = "SELECT COUNT(*) as 'countxx' FROM projects;";
+	//$sql_count = "SELECT COUNT(*) as 'countxx' FROM projects;";
+	//$result_count = mysqli_query($db_projects, $sql_count);
+	//
+	//$result_count_number = mysqli_fetch_assoc($result_count)["countxx"];
+		
+	//default query
+	//$sql = "SELECT * FROM projects ORDER BY client LIMIT $limit_query_projects $query_offset_projects";
+	//WHERE CustomerID=1;
+	$sql = "SELECT * FROM projects ";
+	
+	function dateSortSwitch($placement){
+		
+		$dateSortSwitchQuery = "";
+		
+		if(isset($_GET['date'])){
+			if($_GET['date'] == "new-first"){
+				$dateSortSwitchQuery = "date_created ASC";
+			}else if($_GET['date'] == "old-first"){
+				$dateSortSwitchQuery = "date_created DESC";
+			}else{
+				return;
+			}
+		}else{
+			return "";
+		}
+		
+		if($placement == "after"){
+			return ", ".$dateSortSwitchQuery;
+		}else if($placement == "before"){{
+			return $dateSortSwitchQuery.", ";
+		}
+		}else{
+			return $dateSortSwitchQuery.", ";
+		}
+	}
+	
+	//if(isset($_GET['search']) || isset($_GET['type']) || isset($_GET['status']) || isset($_GET['priorities'])){
+	//	$sql .= "WHERE ";
+	//}
+	
+	// START
+	
+	$sqlInputSearch = "";
+	
+	if(isset($_GET['search'])){
+		if(strlen($_GET['search']) > 0){
+			$sqlInputSearch = "title LIKE '%".$_GET['search']."%'";
+		}
+	}
+	
+	$sqlInputType = "";
+	
+	if(isset($_GET['type'])){
+		if($_GET['type'] == "all-types"){
+			$sqlInputType = "type IN ('software', 'website', 'webapp', 'mobileapp')";
+		}else if($_GET['type'] == "software"){
+			$sqlInputType = "type = 'software'";
+		}else if($_GET['type'] == "website"){
+			$sqlInputType = "type = 'website'";
+		}else if($_GET['type'] == "webapp"){
+			$sqlInputType = "type = 'webapp'";
+		}else if($_GET['type'] == "mobileapp"){
+			$sqlInputType = "type = 'mobileapp'";
+		}
+	}
+	
+	$sqlInputStatus = "";
+	
+	if(isset($_GET['status'])){
+		if($_GET['status'] == "active"){
+			$sqlInputStatus = "status = 'active'";
+		}else if($_GET['status'] == "idle"){
+			$sqlInputStatus = "status = 'idle'";
+		}else if($_GET['status'] == "completed"){
+			$sqlInputStatus = "status = 'completed'";
+		}else if($_GET['status'] == "inactive"){
+			$sqlInputStatus = "status = 'inactive'";
+		}else if($_GET['status'] == "all-status"){
+			$sqlInputStatus = "status IN ('active', 'idle', 'completed', 'inactive')";
+		}
+	}
+	
+	$sqlInputPriorities = "";
+	
+	if(isset($_GET['priorities'])){
+		if($_GET['priorities'] == "all-priorities"){
+			$sqlInputPriorities = "priority IN ('low', 'medium', 'high')";
+		}else if($_GET['priorities'] == "low"){
+			$sqlInputPriorities = "priority = 'low'";
+		}else if($_GET['priorities'] == "medium"){
+			$sqlInputPriorities = "priority = 'medium'";
+		}else if($_GET['priorities'] == "high"){
+			$sqlInputPriorities = "priority = 'high'";
+		}
+	}
+	
+	
+	$sql_count = "SELECT COUNT(*) as 'countxx' FROM projects";
+	$sqlInputArray = [];
+	
+	if(strlen($sqlInputSearch) > 0 || strlen($sqlInputType) > 0 || strlen($sqlInputStatus) > 0 || strlen($sqlInputPriorities) > 0){
+		$sql .= "WHERE ";
+		$sql_count .= " WHERE ";
+		if(strlen($sqlInputSearch) > 0){
+			array_push($sqlInputArray,$sqlInputSearch);
+		}
+		if(strlen($sqlInputType) > 0){
+			array_push($sqlInputArray,$sqlInputType);
+		}
+		if(strlen($sqlInputStatus) > 0){
+			array_push($sqlInputArray,$sqlInputStatus);
+		}
+		if(strlen($sqlInputPriorities) > 0){
+			array_push($sqlInputArray,$sqlInputPriorities);
+		}
+		$sql .= implode(" AND ", $sqlInputArray)." ";
+		$sql_count .= implode(" AND ", $sqlInputArray);
+	}
+	
+	$sql_count .= ";";
 	$result_count = mysqli_query($db_projects, $sql_count);
 
 	$result_count_number = mysqli_fetch_assoc($result_count)["countxx"];
-
-	$sql = "SELECT * FROM projects ORDER BY client LIMIT $limit_query_projects $query_offset_projects";
-	$result = mysqli_query($db_projects, $sql);
-
-	if (mysqli_num_rows($result) > 0) {
-		// output data of each row
+	
+	
+	/*isset($_GET['status'])
+	isset($_GET['priorities'])*/
+	
+	// END
+	
+	
+	if(isset($_GET['client-order'])){
 		
-		$previous_client = "";
+		$sql .= "ORDER BY ";
 		
+		if($_GET['client-order'] == "ascending-client"){
+			$sql .= "client ASC ".dateSortSwitch("after")." ";
+		}else if($_GET['client-order'] == "descending-client"){
+			$sql .= "client DESC ".dateSortSwitch("after")." ";
+		}else if($_GET['client-order'] == "ascending-date"){
+			$sql .= dateSortSwitch("before")."client ASC ";
+		}else if($_GET['client-order'] == "descending-date"){
+			$sql .= dateSortSwitch("before")."client DESC ";
+		}else{
+			$sql .= "client ASC ";
+		}
+	}else{
+		$sql .= "ORDER BY client ASC ";
+	}
+	
+	
+	
+	//QUERY SETTINGS
+	
+	function getSwitchForProjects($value, $getID, $defaultValue){
+			$selectValue = "";
+			
+			if(isset($_GET[$getID])){
+				if($_GET[$getID] == $value){
+					$selectValue = "selected";
+				}
+			}else{
+				if($value == $defaultValue){
+					$selectValue = "selected";
+				}
+			}
+			return 'value="'.$value.'" '.$selectValue."";
+		}
 		
-		
-		echo '<div class="project-grid-container">
-						<div class="project-grid-item project-table-title">Client</div>
+		function searchProjectValue(){
+			if(isset($_GET['search'])){
+				return 'value="'.$_GET['search'].'"';
+			}else{
+				return;
+			}
+			return;
+		}
+	
+	echo '<div class="project-grid-container">
+					<div class="project-grid-item project-table-title">Client</div>
 						<div>
 							<div class="project-grid-subgrid">
 								<div class="project-grid-item project-table-title">Project Info</div>
@@ -67,11 +231,13 @@ if (!securePage($_SERVER['PHP_SELF'])){die();}
 							</div>
 						</div>
 					</div>
-					<div class="project-grid-container">
+					<form class="project-grid-container" form="search-projects"  action="projects.php">
 						<div class="project-grid-item">
 							<select class="client-order" id="client-order" name="client-order">
-								<option value="ascending" selected>Ascending</option>
-								<option value="descending">Descending</option>
+								<option '.getSwitchForProjects("ascending-client", "client-order", "ascending-client").'>Ascending</option>
+								<option '.getSwitchForProjects("descending-client", "client-order", "ascending-client").'>Descending</option>
+								<option '.getSwitchForProjects("ascending-date", "client-order", "ascending-client").'>Ascending (Prioritize Date Created)</option>
+								<option '.getSwitchForProjects("descending-date", "client-order", "ascending-client").'>Descending (Prioritize Date Created)</option>
 							</select>
 						</div>
 						<div>
@@ -79,47 +245,78 @@ if (!securePage($_SERVER['PHP_SELF'])){die();}
 								<div class="project-grid-item no-padding">
 									<div class="unique-project-search">
 										<div class="unique-project-stretch">
-											<input class="project-searchbar" type="text" placeholder="Search Projects (can be left blank, just submit to apply filters)">
+											<input class="project-searchbar" name="search" type="text" pattern="[a-zA-Z0-9-]+" placeholder="Search Projects (Submit to apply filters. Letters/numbers/spaces only)" '.searchProjectValue().'>
 											<div></div>
 											<input class="project-search" type="submit" value="Submit">
 										</div>
 										<div>
 											<select class="input-100" id="type" name="type">
-												<option value="all-types" selected>All Types</option>
-												<option value="software">Software</option>
-												<option value="website">Website</option>
-												<option value="webapp">Web App</option>
-												<option value="mobileapp">Mobile App</option>
+												<option '.getSwitchForProjects("all-types", "type", "all-types").'>All Types</option>
+												<option '.getSwitchForProjects("software", "type", "all-types").'>Software</option>
+												<option '.getSwitchForProjects("website", "type", "all-types").'>Website</option>
+												<option '.getSwitchForProjects("webapp", "type", "all-types").'>Web App</option>
+												<option '.getSwitchForProjects("mobileapp", "type", "all-types").'>Mobile App</option>
 											</select>
 										</div>
 									</div>
 								</div>
 								<div class="project-grid-item">
 									<select class="input-100" id="status" name="status">
-										<option value="active" selected>Active</option>
-										<option value="idle">Idle</option>
-										<option value="completed">Completed</option>
-										<option value="inactive">Inactive</option>
-										<option value="all-status">All Statuses</option>
+										<option '.getSwitchForProjects("active", "status", "active").'>Active</option>
+										<option '.getSwitchForProjects("idle", "status", "active").'>Idle</option>
+										<option '.getSwitchForProjects("completed", "status", "active").'>Completed</option>
+										<option '.getSwitchForProjects("inactive", "status", "active").'>Inactive</option>
+										<option '.getSwitchForProjects("all-status", "status", "active").'>All Statuses</option>
 									</select>
 								</div>
 								<div class="project-grid-item">
 									<select class="input-100" id="priorities" name="priorities">
-										<option value="all-priorities" selected>All Priorities</option>
-										<option value="low">Low</option>
-										<option value="medium">Medium</option>
-										<option value="high">High</option>
+										<option '.getSwitchForProjects("all-priorities", "priorities", "all-priorities").'>All Priorities</option>
+										<option '.getSwitchForProjects("low", "priorities", "all-priorities").'>Low</option>
+										<option '.getSwitchForProjects("medium", "priorities", "all-priorities").'>Medium</option>
+										<option '.getSwitchForProjects("high", "priorities", "all-priorities").'>High</option>
 									</select>
 								</div>
 								<div class="project-grid-item">
-									<select class="input-100 date-sort-input" id="priorities" name="priorities">
-										<option value="new-first" selected>Newest First</option>
-										<option value="old-first">Oldest First</option>
+									<select class="input-100 date-sort-input" id="date" name="date">
+										<option '.getSwitchForProjects("new-first", "date", "new-first").'>Newest First</option>
+										<option '.getSwitchForProjects("old-first", "date", "new-first").'>Oldest First</option>
 									</select>
 								</div>
 							</div>
 						</div>
-					</div>';
+					</form>';
+	
+	//END OF SETTINGS
+	
+		
+	$sql .= "LIMIT $limit_query_projects $query_offset_projects";
+	
+	//print_r($_GET);
+	
+	$urlQueryPaginationFix = "";
+	
+	foreach($_GET as $key => $value)
+	{
+		if($key != "page"){
+			$urlQueryPaginationFix .= "&".$key."=".$value;
+		}
+	}
+	
+	//debugging
+	//echo $sql;
+	
+	$result = mysqli_query($db_projects, $sql);
+
+	if (mysqli_num_rows($result) > 0) {
+		// output data of each row
+		
+		$previous_client = "";
+		
+		
+		
+			//TOOK FORM FROM THIS POSITION
+			
 		
 		$yyyx = 0;
 		
@@ -177,7 +374,7 @@ if (!securePage($_SERVER['PHP_SELF'])){die();}
 						echo ' current-page';
 					}
 					
-					echo '" href="?page='.$x.'">'.$x.'</a>';
+					echo '" href="?page='.$x.$urlQueryPaginationFix.'">'.$x.'</a>';
 				}
 			}else{
 				$page_limiter = 5;//limit of how many pages to show
@@ -199,13 +396,13 @@ if (!securePage($_SERVER['PHP_SELF'])){die();}
 							echo ' current-page';
 						}
 						
-						echo '" href="?page='.$x.'">'.$x.'</a>';
+						echo '" href="?page='.$x.$urlQueryPaginationFix.'">'.$x.'</a>';
 					}
 					
-					echo '<div class="dot-dot-dot">...</div><a class="page-selector" href="?page='.$max_page.'">'.$max_page.'</a>';
+					echo '<div class="dot-dot-dot">...</div><a class="page-selector" href="?page='.$max_page.$urlQueryPaginationFix.'">'.$max_page.'</a>';
 				}else if($_GET['page'] >= ($max_page - 2)){
 					//echo 'show 1, and MAX - 3';
-					echo '<a class="page-selector" href="?page=1">1</a><div class="dot-dot-dot">...</div>';
+					echo '<a class="page-selector" href="?page=1'.$x.$urlQueryPaginationFix.'">1</a><div class="dot-dot-dot">...</div>';
 					
 					for($x = $max_page-4; $x <= $max_page; $x++){
 						echo ' <a class="page-selector';
@@ -214,12 +411,12 @@ if (!securePage($_SERVER['PHP_SELF'])){die();}
 							echo ' current-page';
 						}
 						
-						echo '" href="?page='.$x.'">'.$x.'</a>';
+						echo '" href="?page='.$x.$urlQueryPaginationFix.'">'.$x.'</a>';
 					}
 				}else{
 					//echo 'show 1, c, and MAX';
 					
-					echo '<a class="page-selector" href="?page=1">1</a><div class="dot-dot-dot">...</div>';
+					echo '<a class="page-selector" href="?page=1'.$urlQueryPaginationFix.'">1</a><div class="dot-dot-dot">...</div>';
 					
 					for($x = $num-1; $x <= $num+3; $x++){
 						echo ' <a class="page-selector';
@@ -228,10 +425,10 @@ if (!securePage($_SERVER['PHP_SELF'])){die();}
 							echo ' current-page';
 						}
 						
-						echo '" href="?page='.$x.'">'.$x.'</a>';
+						echo '" href="?page='.$x.$urlQueryPaginationFix.'">'.$x.'</a>';
 					}
 					
-					echo '<div class="dot-dot-dot">...</div><a class="page-selector" href="?page='.$max_page.'">'.$max_page.'</a>';
+					echo '<div class="dot-dot-dot">...</div><a class="page-selector" href="?page='.$max_page.$urlQueryPaginationFix.'">'.$max_page.'</a>';
 				}
 			}
 			
